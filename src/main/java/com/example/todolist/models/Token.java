@@ -16,6 +16,8 @@ public class Token {
     @Column(unique = true)
     private String token;
 
+    public boolean expired = false;
+
     public boolean revoked = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
