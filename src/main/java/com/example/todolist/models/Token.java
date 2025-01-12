@@ -11,7 +11,7 @@ public class Token {
 
     @Id
     @GeneratedValue
-    private Long id;
+    private Integer id;
 
     @Column(unique = true)
     private String token;
