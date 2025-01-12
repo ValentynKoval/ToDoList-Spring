@@ -1,6 +1,7 @@
 package com.example.todolist.models;
 
 import jakarta.persistence.*;
+import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -9,6 +10,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Entity
+@Data
 @Table(name = "users")
 public class User implements UserDetails {
 
@@ -63,7 +65,7 @@ public class User implements UserDetails {
 
     @Override
     public String getPassword() {
-        return "";
+        return this.password;
     }
 
     @Override
