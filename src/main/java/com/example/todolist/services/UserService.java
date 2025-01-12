@@ -30,4 +30,8 @@ public class UserService implements UserDetailsService {
         user.setActive(true);
         userRepository.save(user);
     }
+
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email).orElse(null);
+    }
 }
