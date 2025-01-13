@@ -10,11 +10,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 @Service
@@ -57,6 +59,25 @@ public class JwtService {
                 .setExpiration(new Date(now.getTime() + duration.toMillis()))
                 .signWith(SignatureAlgorithm.HS256, secret)
                 .compact();
+    }
+
+    public String refreshToken (String refreshToken) throws Exception {
+        Optional<Token> optionalToken = tokenRepository.findByToken(refreshToken);
+        if (optionalToken.isEmpty()) {
+            throw new Exception("Refresh token not found");
+        }
+        if (isTokenExpired(refreshToken)) {
+            throw new Exception("Refresh token expired");
+        }
+
+        Map<String, Object> claims = extractAllClaims(refreshToken);
+        String email = extractUsername(refreshToken);
+        return generateToken(claims, email, accessTokenDuration);
+    }
+
+    @Transactional
+    public void revokeToken(String token) {
+        tokenRepository.deleteByToken(token);
     }
 
     public String extractUsername(String token) {
