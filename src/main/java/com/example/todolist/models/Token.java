@@ -1,8 +1,7 @@
 package com.example.todolist.models;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 @Entity
 @Data
@@ -16,9 +15,9 @@ public class Token {
     @Column(unique = true)
     private String token;
 
-    public boolean expired = false;
+    private boolean expired = false;
 
-    public boolean revoked = false;
+    private boolean revoked = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
