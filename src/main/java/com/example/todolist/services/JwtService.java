@@ -1,10 +1,12 @@
 package com.example.todolist.services;
 
 import com.example.todolist.models.Token;
+import com.example.todolist.models.User;
 import com.example.todolist.repo.TokenRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import lombok.RequiredArgsConstructor;
+import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -12,49 +14,48 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
 @Service
-@RequiredArgsConstructor
 public class JwtService {
     @Value("${security.jwt.secret-key}")
     private String secret;
 
-    @Value("${security.jwt.access-token-duration}")
+    @Value("${security.jwt.expiration}")
     private Duration accessTokenDuration;
 
-    @Value("${security.jwt.refresh-token-duration}")
+    @Value("${security.jwt.refresh-token.expiration}")
     private Duration refreshTokenDuration;
 
+    @Autowired
     private TokenRepository tokenRepository;
-    private UserService userService;
 
-    public Map<String, String> generateTokens(UserDetails userDetails) {
+    public Map<String, String> getTokens(User user) {
         Map<String, Object> claims = new HashMap<>();
-        List<String> roles = List.of(userDetails.getAuthorities().iterator().next().getAuthority());
-        claims.put("roles", roles);
-        String accessToken = generateToken(claims, userDetails, accessTokenDuration);
-        String refreshToken = generateToken(claims, userDetails, refreshTokenDuration);
+        claims.put("role", user.getRole().toString());
+
+        String accessToken = generateToken(claims, user.getEmail(), accessTokenDuration);
+        String refreshToken = generateToken(claims, user.getEmail(), refreshTokenDuration);
         Token token = new Token();
         token.setToken(refreshToken);
-        token.setUser(userService.getUserByEmail(userDetails.getUsername()));
+        token.setUser(user);
         tokenRepository.save(token);
 
         Map<String, String> response = new HashMap<>();
-        response.put("accessToken", accessToken);
-        response.put("refreshToken", refreshToken);
+        response.put("access_token", accessToken);
+        response.put("refresh_token", refreshToken);
         return response;
     }
 
-    private String generateToken(Map<String, Object> claims, UserDetails userDetails, Duration duration) {
+    private String generateToken(Map<String, Object> claims, String email, Duration duration) {
+        Date now = new Date();
         return Jwts.builder()
                 .setClaims(claims)
-                .setSubject(userDetails.getUsername())
-                .setIssuedAt(java.util.Date.from(java.time.Instant.now()))
-                .setExpiration(java.util.Date.from(java.time.Instant.now().plus(duration)))
-                .signWith(io.jsonwebtoken.SignatureAlgorithm.HS512, secret)
+                .setSubject(email)
+                .setIssuedAt(now)
+                .setExpiration(new Date(now.getTime() + duration.toMillis()))
+                .signWith(SignatureAlgorithm.HS256, secret)
                 .compact();
     }
 
