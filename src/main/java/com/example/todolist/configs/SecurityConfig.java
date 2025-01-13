@@ -22,7 +22,7 @@ import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 @Configuration
 public class SecurityConfig {
 
-    private static final String[] PUBLIC_MATCHERS = {"/api/auth/**", "/api/register/**", "/api/users/**", "/api/admin/**"};
+    private static final String[] PUBLIC_MATCHERS = {"/api/auth/register", "/api/auth/login", "/api/auth/refresh"};
     private final UserService userService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
