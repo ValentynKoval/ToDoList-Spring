@@ -22,13 +22,13 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/auth")
+@RequestMapping("/api")
 public class UserController {
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
 
-    @PostMapping("/register")
+    @PostMapping("/auth/register")
     public ResponseEntity<?> registerUser(@RequestBody UserDto userDto) {
         try {
             userService.createNewUser(userDto);
@@ -40,7 +40,7 @@ public class UserController {
         }
     }
 
-    @PostMapping("/login")
+    @PostMapping("/auth/login")
     public ResponseEntity<?> loginUser(@RequestBody AuthUserDto authUserDto, HttpServletResponse response) {
         try {
             Authentication authentication = authenticationManager.authenticate(
@@ -66,5 +66,39 @@ public class UserController {
             catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
         }
+    }
+
+    @PostMapping("/auth/refresh")
+    public ResponseEntity<?> refreshToken(@CookieValue("refresh_token") String refreshToken) {
+        try {
+            if (refreshToken == null) {
+                throw new Exception("Refresh token is null");
+            }
+            String accessToken = jwtService.refreshToken(refreshToken);
+            return ResponseEntity.ok(new HashMap<>() {{put("access_token", accessToken);}});
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e);
+        }
+    }
+
+    @GetMapping("/logout")
+    public ResponseEntity<?> logout(@CookieValue("refresh_token") String refreshToken, HttpServletResponse response) {
+        SecurityContextHolder.clearContext();
+        if (refreshToken != null) {
+            jwtService.revokeToken(refreshToken);
+            Cookie cookie = new Cookie("refresh_token", null);
+            cookie.setHttpOnly(true);
+            cookie.setSecure(true);
+            cookie.setMaxAge(0);
+            cookie.setPath("/");
+            response.addCookie(cookie);
+        }
+        return ResponseEntity.ok("Logout successful");
+    }
+
+    @GetMapping("/info")
+    public ResponseEntity<?> getUserInfo() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return ResponseEntity.ok(userService.getUserByEmail(email));
     }
 }
