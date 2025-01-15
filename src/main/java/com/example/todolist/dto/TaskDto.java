@@ -11,6 +11,6 @@ public class TaskDto {
     private String title;
     private String description;
     private String dueDate;
-    private boolean isComplete;
-    private boolean isShared;
+    private boolean isComplete = false;
+    private boolean isShared = false;
 }
