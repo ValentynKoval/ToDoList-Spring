@@ -7,6 +7,7 @@ import com.example.todolist.models.User;
 import com.example.todolist.services.TaskService;
 import com.example.todolist.services.UserService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +23,7 @@ public class TaskController {
     private final ResponseTaskMapper responseTaskMapper;
 
     @PostMapping()
-    public ResponseEntity<?> createTask(@RequestBody TaskDto taskDto) {
+    public ResponseEntity<?> createTask(@Valid @RequestBody TaskDto taskDto) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userService.getUserByEmail(email);
         Task task = taskService.createTask(taskDto, user);

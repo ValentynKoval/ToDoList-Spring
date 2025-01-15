@@ -7,6 +7,7 @@ import com.example.todolist.services.JwtService;
 import com.example.todolist.services.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +30,7 @@ public class UserController {
     private final JwtService jwtService;
 
     @PostMapping("/auth/register")
-    public ResponseEntity<?> registerUser(@RequestBody UserDto userDto) {
+    public ResponseEntity<?> registerUser(@Valid @RequestBody UserDto userDto) {
         try {
             userService.createNewUser(userDto);
             return ResponseEntity.ok("User registered successfully");
@@ -41,7 +42,7 @@ public class UserController {
     }
 
     @PostMapping("/auth/login")
-    public ResponseEntity<?> loginUser(@RequestBody AuthUserDto authUserDto, HttpServletResponse response) {
+    public ResponseEntity<?> loginUser(@Valid @RequestBody AuthUserDto authUserDto, HttpServletResponse response) {
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(authUserDto.getEmail(), authUserDto.getPassword())
