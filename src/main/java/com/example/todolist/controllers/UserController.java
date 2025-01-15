@@ -99,6 +99,6 @@ public class UserController {
     @GetMapping("/info")
     public ResponseEntity<?> getUserInfo() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return ResponseEntity.ok(userService.getUserByEmail(email));
+        return ResponseEntity.ok(userService.getUserDtoByEmail(email));
     }
 }
