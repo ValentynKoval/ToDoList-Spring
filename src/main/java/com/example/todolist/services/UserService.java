@@ -31,7 +31,7 @@ public class UserService implements UserDetailsService {
         );
     }
 
-    public void createNewUser(UserDto userDto) {
+    public User createNewUser(UserDto userDto) {
         if (!userDto.passwordsMatch()) {
             throw new IllegalArgumentException("Passwords do not match!");
         }
@@ -41,7 +41,7 @@ public class UserService implements UserDetailsService {
         if (user.getRole() == null) {
             user.setRole(Role.USER);
         }
-        userRepository.save(user);
+        return userRepository.save(user);
     }
 
     public User getUserByEmail(String email) {

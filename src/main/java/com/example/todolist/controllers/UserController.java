@@ -4,6 +4,7 @@ import com.example.todolist.dto.AuthUserDto;
 import com.example.todolist.dto.UserDto;
 import com.example.todolist.models.User;
 import com.example.todolist.services.JwtService;
+import com.example.todolist.services.MailSenderService;
 import com.example.todolist.services.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -28,11 +29,14 @@ public class UserController {
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final MailSenderService mailSenderService;
 
     @PostMapping("/auth/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody UserDto userDto) {
         try {
-            userService.createNewUser(userDto);
+            User user = userService.createNewUser(userDto);
+            String message = "Thank you for registering for our service! It will be very useful for you in planning your day and assigning tasks.";
+            mailSenderService.send(user.getEmail(), "Registration", message);
             return ResponseEntity.ok("User registered successfully");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
