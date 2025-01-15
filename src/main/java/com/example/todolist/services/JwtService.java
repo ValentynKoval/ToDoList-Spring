@@ -67,9 +67,11 @@ public class JwtService {
             throw new Exception("Refresh token not found");
         }
         if (isTokenExpired(refreshToken)) {
+            Token token = optionalToken.get();
+            token.setExpired(true);
+            tokenRepository.save(token);
             throw new Exception("Refresh token expired");
         }
-
         Map<String, Object> claims = extractAllClaims(refreshToken);
         String email = extractUsername(refreshToken);
         return generateToken(claims, email, accessTokenDuration);
